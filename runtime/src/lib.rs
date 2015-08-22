@@ -35,6 +35,7 @@ pub mod relation;
 pub mod view;
 pub mod flow;
 pub mod primitive;
+pub mod python;
 pub mod compiler;
 pub mod login;
 pub mod server;

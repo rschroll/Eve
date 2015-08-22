@@ -172,7 +172,8 @@ module api {
     "as text": {"as text: A": ""},
     "standard deviation": {"standard deviation: A": []},
 
-    sum: {"sum: A": []}
+    sum: {"sum: A": []},
+    pysum: {"pysum: A": []}
   }
 
   // This index needs to be hardcoded for code.ix to work.

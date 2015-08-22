@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use value::{Value, Id};
 use relation::{Relation};
 use primitive::{Primitive};
+use python::{Python};
 use std::cmp::Ordering;
 use std::mem::replace;
 
@@ -27,10 +28,16 @@ pub enum Direction {
     Descending,
 }
 
+#[derive(Clone, Debug, Copy)]
+pub enum Function {
+    Primitive(Primitive),
+    Python(Python),
+}
+
 #[derive(Clone, Debug)]
 pub enum Input {
-    Primitive{
-        primitive: Primitive,
+    Function {
+        function: Function,
         input_bindings: Vec<(usize, usize)>, // (field_ix, variable_ix)
     },
     View{
@@ -164,11 +171,15 @@ fn join_step(join: &Join, ix: usize, inputs: &[Vec<Vec<Value>>], state: &mut Vec
                     join_step(join, ix+1, inputs, state, index, errors);
                 }
             }
-            Input::Primitive{primitive, ref input_bindings} => {
+            Input::Function{function, ref input_bindings} => {
                 // NOTE rows returned from primitives don't include inputs, so we have to offset accesses by input_len
                 let input_len = input_bindings.len();
                 // call the primitive
-                for mut row in primitive.eval(&input_bindings[..], &state[..], &source.id, errors).into_iter() {
+                let rows = match function {
+                    Function::Primitive(p) => p.eval(&input_bindings[..], &state[..], &source.id, errors),
+                    Function::Python(p) => p.eval(&input_bindings[..], &state[..], &source.id, errors),
+                };
+                for mut row in rows.into_iter() {
                     // write variables which are bound for the first time
                     for &(field_ix, variable_ix) in source.output_bindings.iter() {
                         state[variable_ix] = replace(&mut row[field_ix - input_len], Value::Null);
@@ -215,7 +226,7 @@ impl View {
                 // prepare any non-primitive upstream relations
                 let inputs = join.sources.iter().map(|source|
                     match source.input {
-                        Input::Primitive{..} => {
+                        Input::Function{..} => {
                             vec![]
                         }
                         Input::View{input_ix, ..} => {

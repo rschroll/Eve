@@ -6,10 +6,11 @@ use bit_set::BitSet;
 
 use value::Value;
 use relation::{Relation, mapping, with_mapping};
-use view::{View, Join, Input, Source, Direction};
+use view::{View, Join, Input, Function, Source, Direction};
 use flow::{Node, Flow};
 use primitive;
 use primitive::Primitive;
+use python::{self, Python};
 
 // The compiler is responsible for creating a new Flow whenever the program changes.
 // Eve code is stored in tables, like all other state.
@@ -868,7 +869,8 @@ fn plan(flow: &Flow) {
                 [string!("{}", view), Float(ix as f64), string!("{}: {}", view, name), string!("{}", name)]);
         }
     }
-    for (view, scalar_input_names, vector_input_names, output_names, _) in primitive::primitives().into_iter() {
+    let func_iter = primitive::primitives().into_iter().chain(python::python_funcs());
+    for (view, scalar_input_names, vector_input_names, output_names, _) in func_iter {
         for (ix, name) in
         scalar_input_names.into_iter()
         .chain(vector_input_names.into_iter())
@@ -1206,8 +1208,12 @@ fn create(flow: &Flow) -> Flow {
                 let source = Source{
                     id: source.as_str().to_owned(),
                     input: match input {
-                        &String(ref primitive) => Input::Primitive{
-                            primitive: Primitive::from_str(primitive),
+                        &String(ref primitive) => Input::Function {
+                            function: if primitive.contains("py") {
+                                Function::Python(Python::from_str(primitive))
+                            } else {
+                                Function::Primitive(Primitive::from_str(primitive))
+                            },
                             input_bindings: vec![],
                         },
                         &Float(upstream_view_ix) => Input::View{
@@ -1234,7 +1240,7 @@ fn create(flow: &Flow) -> Flow {
                 let source = &mut join.sources[source_ix.as_usize()];
                 let binding = (field_ix.as_usize(), variable_ix.as_usize());
                 match (kind.as_str(), &mut source.input) {
-                    ("input", &mut Input::Primitive{ref mut input_bindings, ..}) => input_bindings.push(binding),
+                    ("input", &mut Input::Function{ref mut input_bindings, ..}) => input_bindings.push(binding),
                     ("constraint", _) => source.constraint_bindings.push(binding),
                     ("output", _) => source.output_bindings.push(binding),
                     other => panic!("Unexpected binding kind / input combo: {:?}", other),
@@ -1390,7 +1396,8 @@ pub fn bootstrap(flow: &mut Flow) {
             }
         }
 
-        for (primitive, scalar_inputs, vector_inputs, outputs, description) in primitive::primitives().into_iter() {
+        let func_iter = primitive::primitives().into_iter().chain(python::python_funcs());
+        for (primitive, scalar_inputs, vector_inputs, outputs, description) in func_iter {
             view_table.index.insert(vec![string!("{}", primitive), string!("primitive")]);
             display_name_table.index.insert(vec![string!("{}", primitive), string!("{}", primitive)]);
             for name in scalar_inputs.into_iter() {
