@@ -10,7 +10,7 @@ use view::{View, Join, Input, Function, Source, Direction};
 use flow::{Node, Flow};
 use primitive;
 use primitive::Primitive;
-use python::{self, Python};
+use python::{self, PythonFunc};
 
 // The compiler is responsible for creating a new Flow whenever the program changes.
 // Eve code is stored in tables, like all other state.
@@ -1210,7 +1210,7 @@ fn create(flow: &Flow) -> Flow {
                     input: match input {
                         &String(ref primitive) => Input::Function {
                             function: if primitive.contains("py") {
-                                Function::Python(Python::from_str(primitive))
+                                Function::PythonFunc(PythonFunc::from_str(primitive))
                             } else {
                                 Function::Primitive(Primitive::from_str(primitive))
                             },

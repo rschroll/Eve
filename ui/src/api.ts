@@ -173,7 +173,7 @@ module api {
     "standard deviation": {"standard deviation: A": []},
 
     sum: {"sum: A": []},
-    pysum: {"pysum: A": []}
+    pystd: {"pystd: A": []}
   }
 
   // This index needs to be hardcoded for code.ix to work.

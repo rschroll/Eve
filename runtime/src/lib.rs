@@ -14,6 +14,7 @@ extern crate mime;
 extern crate bit_set;
 extern crate conduit_mime_types;
 extern crate getopts;
+extern crate cpython;
 
 macro_rules! time {
     ($name:expr, $expr:expr) => {{

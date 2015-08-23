@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use value::{Value, Id};
 use relation::{Relation};
 use primitive::{Primitive};
-use python::{Python};
+use python::{PythonFunc};
 use std::cmp::Ordering;
 use std::mem::replace;
 
@@ -31,7 +31,7 @@ pub enum Direction {
 #[derive(Clone, Debug, Copy)]
 pub enum Function {
     Primitive(Primitive),
-    Python(Python),
+    PythonFunc(PythonFunc),
 }
 
 #[derive(Clone, Debug)]
@@ -177,7 +177,7 @@ fn join_step(join: &Join, ix: usize, inputs: &[Vec<Vec<Value>>], state: &mut Vec
                 // call the primitive
                 let rows = match function {
                     Function::Primitive(p) => p.eval(&input_bindings[..], &state[..], &source.id, errors),
-                    Function::Python(p) => p.eval(&input_bindings[..], &state[..], &source.id, errors),
+                    Function::PythonFunc(p) => p.eval(&input_bindings[..], &state[..], &source.id, errors),
                 };
                 for mut row in rows.into_iter() {
                     // write variables which are bound for the first time

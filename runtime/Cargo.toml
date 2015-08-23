@@ -20,6 +20,7 @@ conduit-mime-types = "*"
 websocket = "*"
 bit-set = "*"
 getopts = "*"
+cpython = { git = "https://github.com/dgrunwald/rust-cpython.git" }
 
 [profile.release]
 debug = true

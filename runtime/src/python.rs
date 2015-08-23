@@ -1,14 +1,15 @@
+use cpython::{PythonObject, Python, ObjectProtocol};
 use value::{Value};
 
 // Primitive views are how Eve programs access built-in functions
 #[derive(Clone, Debug, Copy)]
-pub struct Python {
+pub struct PythonFunc {
     func_name: u8,
 }
 
-impl Python {
-    pub fn new(name: u8) -> Python {
-        Python {
+impl PythonFunc {
+    pub fn new(name: u8) -> PythonFunc {
+        PythonFunc {
             func_name: name,
         }
     }
@@ -32,10 +33,15 @@ impl Python {
             (0, [ref a]) => {
                 match a.parse_as_f64_vec() {
                     Some(a) => {
+                        let gil = Python::acquire_gil();
+                        let py = gil.python();
+                        let np = py.import("numpy").unwrap();
+                        let std = np.get("std").unwrap();
+
                         if a.len() == 0 {
                             vec![vec![Float(0f64)]]
                         } else {
-                            let sum = a.iter().fold(0f64, |acc, value| { acc + value });
+                            let sum: f64 = std.call((&a[..],), None).unwrap().extract().unwrap();
                             vec![vec![Float(sum)]]
                         }
                     }
@@ -48,7 +54,7 @@ impl Python {
 
     pub fn from_str(string: &str) -> Self {
         match string {
-            "pysum" => Python::new(0),
+            "pystd" => PythonFunc::new(0),
             _ => panic!("Unknown python function: {:?}", string),
         }
     }
@@ -57,6 +63,6 @@ impl Python {
 // List of (view_id, scalar_input_field_ids, vector_input_field_ids, output_field_ids, description)
 pub fn python_funcs() -> Vec<(&'static str, Vec<&'static str>, Vec<&'static str>, Vec<&'static str>, &'static str)> {
     vec![
-        ("pysum", vec![], vec!["A"], vec!["result"], "Python Sum together the elements of A."),
+        ("pystd", vec![], vec!["A"], vec!["result"], "Python Standard Deviation."),
     ]
 }
