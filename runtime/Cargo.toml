@@ -21,6 +21,7 @@ websocket = "*"
 bit-set = "*"
 getopts = "*"
 cpython = { git = "https://github.com/dgrunwald/rust-cpython.git" }
+lazy_static = "0.1.*"
 
 [profile.release]
 debug = true

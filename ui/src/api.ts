@@ -173,7 +173,13 @@ module api {
     "standard deviation": {"standard deviation: A": []},
 
     sum: {"sum: A": []},
-    pystd: {"pystd: A": []}
+    "numpy.amin": {"numpy.amin: A": []},
+    "numpy.amax": {"numpy.amax: A": []},
+    "numpy.median": {"numpy.median: A": []},
+    "numpy.average": {"numpy.average: A": []},
+    "numpy.mean": {"numpy.mean: A": []},
+    "numpy.std": {"numpy.std: A": []},
+    "numpy.var": {"numpy.var: A": []}
   }
 
   // This index needs to be hardcoded for code.ix to work.

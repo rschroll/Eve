@@ -9,6 +9,7 @@ dependencies = [
  "cpython 0.0.3 (git+https://github.com/dgrunwald/rust-cpython.git)",
  "getopts 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "mime 0.0.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
